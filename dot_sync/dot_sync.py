@@ -3,11 +3,9 @@
 """A tool that provides syncing capabilities between folders on the same or an external host."""
 
 import click
-from click.testing import CliRunner
 from scandir import walk
-from sh import rsync, wget, ssh, tar
+from sh import rsync, ssh
 from pathlib2 import Path
-import fnmatch
 import os
 import errno
 
@@ -25,9 +23,9 @@ excludes = {'/media/Windows/Users/genzo/Dropbox/transfer', '.cache', 'VirtualBox
 
 def _silent_delete(path):
     try:
-        os.remove(sync_file_path.as_posix())
+        os.remove(path.as_posix())
     except OSError as error:
-        if error.errno == errno.ENOENT: # errno.ENOENT = no such file or directory
+        if error.errno == errno.ENOENT:  # errno.ENOENT = no such file or directory
             pass
         else:
             raise
@@ -38,13 +36,14 @@ def _synchronize_mappings(sync_mappings):
 
         if ssh_connection_uri:
             ssh(ssh_connection_uri, 'mkdir', '-p', to_path.as_posix())
+            to_uri = ssh_connection_uri + ':' + to_path.as_posix()
         else:
             to_path.mkdir(parents=True, exist_ok=True)
+            to_uri = to_path.as_posix()
 
         exclude_params = zip(len(excludes) * ['--exclude'], excludes)
-        to_path = ssh_connection_uri+':' + to_path.as_posix() if ssh_connection_uri else to_path.as_posix()
 
-        rsync('-rltv', from_path.as_posix() + '/', to_path + '/', delete=True, *exclude_params)
+        rsync('-rltv', "{}/{}/".format(from_path.as_posix(), to_uri), delete=True, *exclude_params)
 
 
 def _print_sync_mappings(sync_mappings):
@@ -53,12 +52,12 @@ def _print_sync_mappings(sync_mappings):
                   if to_path.exists() else
                   click.style("doesn't exist", fg="red", bold=True))
 
-        click.echo('{:>60} -> {:<60} {:>8}'.format(from_path, to_path, '(' + status+')'))
+        click.echo('{:>60} -> {:<60} {:>8}'.format(from_path, to_path, '(' + status + ')'))
 
 
-def _get_sync_paths(path, excludes, root_sync_path):
-    for root, directories, files in walk(path):
-        if '.exclude' in files and root_sync_path not in root:
+def _get_sync_paths(from_path, excludes, to_path):
+    for root, directories, files in walk(from_path):
+        if '.exclude' in files and to_path not in root:
             excludes |= {root}
 
         if '.sync' in files:
@@ -72,6 +71,7 @@ def _get_sync_paths(path, excludes, root_sync_path):
 @click.pass_context
 def sync(ctx, root_sync_path):
     ctx.obj['root_sync_path'] = root_sync_path
+
 
 @sync.command()
 @click.pass_context
@@ -122,6 +122,7 @@ def list(ctx):
                      for path in sync_paths]
     _print_sync_mappings(sync_mappings)
 
+
 @sync.command()
 @click.pass_context
 @click.argument('path', type=click.Path(exists=True))
@@ -142,8 +143,7 @@ def unlink(ctx, path):
         backup_folder_path = root_sync_path / sync_file_path.parent.relative_to('/')
         _silent_delete(backup_folder_path)
 
+
 if __name__ == '__main__':
     sync(obj={})
-    #runner = CliRunner()
-    #result = runner.invoke(cli, ['list'])
-    #print result.output
+
