@@ -48,9 +48,11 @@ def _synchronize_mappings(sync_mappings):
 
 def _print_sync_mappings(sync_mappings):
     for from_path, to_path in sync_mappings:
-        status = (click.style('exists', fg="green", bold=True)
-                  if to_path.exists() else
-                  click.style("doesn't exist", fg="red", bold=True))
+
+        if to_path.exists():
+            status = click.style('exists', fg="green", bold=True)
+        else:
+            status = click.style("doesn't exist", fg="red", bold=True)
 
         click.echo('{:>60} -> {:<60} {:>8}'.format(from_path, to_path, '(' + status + ')'))
 
@@ -146,4 +148,3 @@ def unlink(ctx, path):
 
 if __name__ == '__main__':
     sync(obj={})
-
