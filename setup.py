@@ -13,11 +13,14 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.7',
-    # TODO: put package requirements here
+    'scandir>=1.5',
+    'sh>=1.12.14',
+    'pathlib2>=2.3.0'
 ]
 
 setup_requirements = [
-    # TODO(carlba): put setup requirements (distutils extensions, etc.) here
+    'scandir>=1.5',
+    'sh>=1.12.14'
 ]
 
 test_requirements = [
@@ -35,7 +38,7 @@ setup(
     packages=find_packages(include=['dot_sync']),
     entry_points={
         'console_scripts': [
-            'dot_sync=dot_sync.cli:main'
+            'dot_sync=dot_sync.dot_sync:sync'
         ]
     },
     include_package_data=True,
