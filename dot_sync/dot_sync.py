@@ -43,12 +43,11 @@ def _synchronize_mappings(sync_mappings):
 
         exclude_params = zip(len(excludes) * ['--exclude'], excludes)
 
-        rsync('-rltv', "{}/{}/".format(from_path.as_posix(), to_uri), delete=True, *exclude_params)
+        rsync('-rltv', from_path.as_posix() + '/', to_uri + '/', delete=True, *exclude_params)
 
 
 def _print_sync_mappings(sync_mappings):
     for from_path, to_path in sync_mappings:
-
         if to_path.exists():
             status = click.style('exists', fg="green", bold=True)
         else:
@@ -146,5 +145,9 @@ def unlink(ctx, path):
         _silent_delete(backup_folder_path)
 
 
-if __name__ == '__main__':
+def main():
     sync(obj={})
+
+
+if __name__ == '__main__':
+    main()
