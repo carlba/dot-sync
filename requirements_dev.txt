@@ -8,6 +8,8 @@ coverage==4.1
 Sphinx==1.6.3
 sphinx-rtd-theme==0.2.4
 Click==6.7
-cryptography==1.7
 PyYAML==3.11
+scandir==1.5
+sh==1.12.14
+pathlib2==2.3.0
 
