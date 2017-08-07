@@ -38,7 +38,7 @@ setup(
     packages=find_packages(include=['dot_sync']),
     entry_points={
         'console_scripts': [
-            'dot_sync=dot_sync.dot_sync:sync'
+            'dot_sync=dot_sync.dot_sync:main'
         ]
     },
     include_package_data=True,
